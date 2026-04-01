@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Node.js · DynamoDB</p>
+      <h1><%= title %></h1>
+      <p class="lead">Daftar nama dan keterangan dari tabel <code><%= tableName %></code>. Jika AWS belum aktif, tampil data contoh.</p>
+      <% if (typeof error !== 'undefined' && error) { %>
+        <p class="banner error"><%= error %></p>
+      <% } %>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="cards" aria-label="Daftar item">
+      <% if (!items || items.length === 0) { %>
+        <p class="empty">Belum ada data.</p>
+      <% } else { %>
+        <% items.forEach(function (row) { %>
+          <article class="card">
+            <h2 class="card-title"><%= row.nama %></h2>
+            <p class="card-desc"><%= row.keterangan %></p>
+          </article>
+        <% }); %>
+      <% } %>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p><a href="/api/items">JSON API</a> · Endpoint sama dipakai untuk integrasi lain.</p>
+  </footer>
+</body>
+</html>
