@@ -1,7 +1,7 @@
 require("dotenv").config();
 const path = require("path");
 const express = require("express");
-const { getItems, TABLE } = require("./services/dynamodbItems");
+const { getItemsWithMeta, TABLE } = require("./services/dynamodbItems");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -12,11 +12,13 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", async (req, res) => {
   try {
-    const items = await getItems();
+    const { items, source, warning } = await getItemsWithMeta();
     res.render("index", {
       title: "Beranda",
       items,
       tableName: TABLE,
+      source,
+      warning,
     });
   } catch (e) {
     res.status(500).render("index", {
@@ -30,8 +32,8 @@ app.get("/", async (req, res) => {
 
 app.get("/api/items", async (req, res) => {
   try {
-    const items = await getItems();
-    res.json({ ok: true, table: TABLE, items });
+    const { items, source, warning } = await getItemsWithMeta();
+    res.json({ ok: true, table: TABLE, source, warning, items });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }

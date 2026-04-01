@@ -3,6 +3,7 @@ const { DynamoDBDocumentClient, ScanCommand } = require("@aws-sdk/lib-dynamodb")
 
 const TABLE = process.env.DYNAMODB_TABLE || "homepage-items";
 const REGION = process.env.AWS_REGION || "ap-southeast-1";
+const STRICT_DYNAMODB = process.env.STRICT_DYNAMODB === "true";
 
 let docClient = null;
 
@@ -45,17 +46,39 @@ async function listItemsFromDynamoDB() {
 }
 
 /**
- * @returns {Promise<Array<{ id: string, nama: string, keterangan: string }>>}
+ * @returns {{ message: string, code?: string, statusCode?: number }}
  */
-async function getItems() {
+function formatDynamoError(err) {
+  return {
+    message: [err?.name, err?.message].filter(Boolean).join(": ") || "Unknown DynamoDB error",
+    code: err?.code || err?.name,
+    statusCode: err?.$metadata?.httpStatusCode,
+  };
+}
+
+/**
+ * @returns {Promise<{ items: Array<{ id: string, nama: string, keterangan: string }>, source: "dynamodb" | "sample", warning?: string }>}
+ */
+async function getItemsWithMeta() {
   try {
     const items = await listItemsFromDynamoDB();
-    if (items.length > 0) return items;
-    return SAMPLE_ITEMS;
+    if (items.length > 0) return { items, source: "dynamodb" };
+    return { items: SAMPLE_ITEMS, source: "sample", warning: "DynamoDB kosong, memakai data contoh." };
   } catch (err) {
-    console.warn("[DynamoDB]", err.name || err.message, "- memakai data contoh.");
-    return SAMPLE_ITEMS;
+    const detail = formatDynamoError(err);
+    if (STRICT_DYNAMODB) throw new Error(`[DynamoDB] ${detail.message}`);
+    console.warn("[DynamoDB] gagal akses tabel, memakai data contoh:", detail);
+    return { items: SAMPLE_ITEMS, source: "sample", warning: detail.message };
   }
 }
 
-module.exports = { getItems, SAMPLE_ITEMS, TABLE };
+/**
+ * Backward compatible helper
+ * @returns {Promise<Array<{ id: string, nama: string, keterangan: string }>>}
+ */
+async function getItems() {
+  const result = await getItemsWithMeta();
+  return result.items;
+}
+
+module.exports = { getItems, getItemsWithMeta, SAMPLE_ITEMS, TABLE };

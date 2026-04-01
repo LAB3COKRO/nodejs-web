@@ -12,6 +12,12 @@
       <p class="eyebrow">Node.js · DynamoDB</p>
       <h1><%= title %></h1>
       <p class="lead">Daftar nama dan keterangan dari tabel <code><%= tableName %></code>. Jika AWS belum aktif, tampil data contoh.</p>
+      <% if (typeof source !== 'undefined') { %>
+        <p class="banner"><strong>Sumber data:</strong> <%= source %></p>
+      <% } %>
+      <% if (typeof warning !== 'undefined' && warning) { %>
+        <p class="banner error"><%= warning %></p>
+      <% } %>
       <% if (typeof error !== 'undefined' && error) { %>
         <p class="banner error"><%= error %></p>
       <% } %>
