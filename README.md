@@ -41,12 +41,35 @@ Edit file `.env`, minimal isi:
 - `AWS_REGION`
 - `DYNAMODB_TABLE`
 
-### 5) Jalankan app
+### 5) Setup AWS Credential
+
+#### Opsi 1 (Recommended): IAM Role di EC2
+1. Buat IAM Role untuk EC2.
+2. Attach policy DynamoDB (minimal `dynamodb:Scan`) ke tabel yang dipakai.
+3. Attach role tersebut ke EC2 instance.
+4. Verifikasi di server:
+```bash
+aws sts get-caller-identity
+```
+
+#### Opsi 2 (Quick): Access Key di `.env`
+Tambahkan ke `.env`:
+```env
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+```
+
+Lalu restart app setelah update env:
+```bash
+pm2 restart nodejs-web --update-env
+```
+
+### 6) Jalankan app
 ```bash
 pm2 start src/server.js --name nodejs-web
 pm2 save
 pm2 startup
 ```
 
-### 6) (Opsional) Reverse proxy via Nginx
+### 7) (Opsional) Reverse proxy via Nginx
 Konfigurasikan Nginx agar request port `80` diarahkan ke app `localhost:3000`.
