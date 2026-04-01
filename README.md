@@ -64,12 +64,49 @@ Lalu restart app setelah update env:
 pm2 restart nodejs-web --update-env
 ```
 
-### 6) Jalankan app
+### 6) Buat DynamoDB (database)
+
+Nama tabel yang dipakai default: `homepage-items`  
+(atau sesuaikan dengan nilai `DYNAMODB_TABLE` di `.env`).
+
+Struktur data minimal yang direkomendasikan:
+- `id` (String) -> **Partition Key**
+- `nama` (String)
+- `keterangan` (String)
+
+Contoh item:
+```json
+{
+  "id": "1",
+  "nama": "Produk A",
+  "keterangan": "Deskripsi singkat produk A"
+}
+```
+
+Cara cepat via AWS CLI:
+```bash
+aws dynamodb create-table \
+  --table-name homepage-items \
+  --attribute-definitions AttributeName=id,AttributeType=S \
+  --key-schema AttributeName=id,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --region ap-southeast-1
+```
+
+Tambah data contoh:
+```bash
+aws dynamodb put-item \
+  --table-name homepage-items \
+  --item '{"id":{"S":"1"},"nama":{"S":"Produk A"},"keterangan":{"S":"Deskripsi singkat produk A"}}' \
+  --region ap-southeast-1
+```
+
+### 7) Jalankan app
 ```bash
 pm2 start src/server.js --name nodejs-web
 pm2 save
 pm2 startup
 ```
 
-### 7) (Opsional) Reverse proxy via Nginx
+### 8) (Opsional) Reverse proxy via Nginx
 Konfigurasikan Nginx agar request port `80` diarahkan ke app `localhost:3000`.
