@@ -5,7 +5,7 @@ Homepage web menggunakan Node.js + DynamoDB AWS.
 ## Deploy Singkat ke EC2
 
 ### Tools yang perlu disiapkan
-- AWS Account + EC2 instance (Ubuntu)
+- AWS Account + EC2 instance (Amazon Linux / distro berbasis `yum`)
 - Key pair `.pem` untuk SSH
 - Security Group (buka port `22`, `80`, dan `3000` jika belum pakai reverse proxy)
 - Git
@@ -15,15 +15,15 @@ Homepage web menggunakan Node.js + DynamoDB AWS.
 
 ### 1) Connect ke EC2
 ```bash
-ssh -i "your-key.pem" ubuntu@<EC2_PUBLIC_IP>
+ssh -i "your-key.pem" ec2-user@<EC2_PUBLIC_IP>
 ```
 
 ### 2) Install dependency di server
 ```bash
-sudo apt update
-sudo apt install -y git nginx
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt install -y nodejs
+sudo yum update -y
+sudo yum install -y git nginx
+curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+sudo yum install -y nodejs
 sudo npm i -g pm2
 ```
 
